@@ -1,0 +1,27 @@
+[build-system]
+requires = [
+    "setuptools>=80.9.0",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docassemble.StPaulMNLimitRentIncrease"
+version = "0.0.1"
+description = "Generates a letter that petitions a limitation to any rent increase not to exceed 3%."
+readme = "README.md"
+authors = [
+    { name = "D L", email = "derek.loren@su.suffolk.edu" },
+]
+dependencies = []
+license = "MIT"
+license-files = [
+    "LICENSE",
+]
+
+[project.urls]
+Homepage = "https://docassemble.org"
+
+[tool.setuptools.packages.find]
+where = [
+    ".",
+]
