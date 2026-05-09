@@ -1,0 +1,486 @@
+---
+include:
+  - docassemble.AssemblyLine:assembly_line.yml
+  - docassemble.LITLabTheme:main.yml
+---
+metadata:
+  title: >-
+    Limit your rent increase in St. Paul
+  short title: >-
+    Limit your rent
+  description: |-
+    This interview helps someone living in St. Paul, Minnesota limit their rent increase
+    under St. Paul's rent control rules if the amount of the increase is more than 3%.
+    The interview will generate a letter to the landlord to fight the increase, and 
+    instructions for next steps.
+
+    It will help you figure out what charges are allowed. It will also help you gather 
+    information about your landlord and any other tenants in your building who are also
+    getting a rent increase.
+
+    The original letter was created by HOME Line, a tenant advocacy organization in Minnesota. You can get free
+    legal advice from HOME Line by calling their hotline at <a href="tel:612-728-5767">612-728-5767</a>.
+  can_I_use_this_form: |
+    If you are a renter in St. Paul, Minnesota and your landlord is trying to raise your
+    rent more than 3%, you can use this interview to send a letter to your landlord to
+    fight the increase.
+  before_you_start: |
+    Before you get started, gather:
+    
+    1. Your lease agreement
+    2. Any utilities you pay for
+    3. Records of any other fees you paid to the Landlord
+  when_you_are_finished: |
+    1. Call the HOME Line to speak with a tenant advocate at 612-728-5767.
+    2. Sign and date the letter.
+    3. Make a copy of the letter and keep it.
+    4. Send the original letter to the landlord or property manager. Certified mail is best, but first class mail also works.
+    5. Write down the date you mailed the letter.
+    6. If you have not heard from the landlord in 7 days, file a complaint with the City of St. Paul.
+  maturity: production
+  estimated_completion_minutes: 10
+  estimated_completion_delta: 5
+  LIST_topics: 
+    - "HO-06-00-00-00"
+  tags:
+    - "HO-06-00-00-00"
+  authors:
+    - DLIT
+  original_form:
+    - https://homelinemn.org/form-letters/city-of-st-paul-rent-stabilization-form-letter/
+  original_form_published_on: 2023-05-01
+  help_page_url: >-
+    https://homelinemn.org/hotline-services/
+  help_page_title: >-
+    St. Paul Minnesota HOME Tenant Assistance
+  landing_page_url: >-
+    https://homelinemn.org/form-letters/city-of-st-paul-rent-stabilization-form-letter/
+  allowed_courts: []
+  typical_role: "defendant"
+  al_weaver_version: "1.11.0"
+  generated_on: "2025-10-20"
+  languages:
+    - en
+  jurisdiction: NAM-US-US+MN
+  review_date: 2025-10-20
+  form_titles:
+    - Limit your rent increase
+  form_numbers: []
+  update_notes: |
+---
+code: |
+  # This controls the default country and list of states in address field questions
+  AL_DEFAULT_COUNTRY = "US"
+---
+code: |
+  # This controls the default state in address field questions
+  AL_DEFAULT_STATE = "MN"
+---
+code: |
+  github_repo_name = "docassemble-LimitYourRentIncrease"
+---
+code: |
+  interview_short_title = "Rent increase"
+---
+code: |
+  al_form_type = "letter"
+---
+objects:
+  - users: ALPeopleList.using(there_are_any=True)
+---
+sections:
+  - review_limit_your_rent_increase: Check your answers
+---
+#################### Interview order #####################
+comment: |
+  Controls order and branching logic for questions specific to this form
+id: interview_order_limit_your_rent_increase
+code: |
+  # Set the allowed courts for this interview
+  nav.set_section("review_limit_your_rent_increase")
+  user_role = "defendant"
+  user_ask_role = "defendant"
+
+  if not lives_in_stpaul:
+    exit_non_resident
+
+  users.gather()
+  set_parts(subtitle=str(users))
+  current_rent_amount
+  current_late_fees
+  set_progress(16)
+  current_rent_total
+  proposed_rent_amount
+  proposed_late_fees
+  set_progress(32)
+  proposed_rent_total
+  rent_increase_percent
+  other_parties.gather()
+  set_progress(48)
+  other_parties[0].address.address
+  users[0].address.address
+  signature_date
+  interview_order_limit_your_rent_increase = True
+---
+###################### Main order ######################
+comment: |
+  This block includes the logic for standalone interviews.
+  Delete mandatory: True to include in another interview
+mandatory: True
+code: |
+  al_intro_screen
+  limit_your_rent_increase_intro
+  interview_order_limit_your_rent_increase
+  signature_date
+  # Store anonymous data for analytics / statistics
+  store_variables_snapshot(
+    persistent=True,
+    data={
+      "zip": showifdef("users[0].address.zip"),
+      "reached_interview_end": True,
+    },
+  )
+  limit_your_rent_increase_download
+---
+id: st_paul_residency_status
+question: |
+  Do you live in St. Paul, MN?
+fields:
+  - I live in St. Paul: lives_in_stpaul
+    datatype: yesnoradio
+---
+id: exit non resident
+event: exit_non_resident
+question: Sorry, this is not the right form for you
+---
+id: Limit_your_rent_increase
+continue button field: limit_your_rent_increase_intro
+question: |
+  Limit your rent
+subquestion: |
+  If you rent, you can use this tool to fight a rent hike.
+  
+  Before you start, get your lease, bills, and fee records.
+
+  After you finish, sign and mail the letter. Keep a copy for your records.
+
+  Most people take about 10 minutes.
+---
+id: Rent now
+question: |
+  Rent now
+subquestion: |
+  Enter your rent now.
+fields:
+  - "Rent now": current_rent_amount
+    datatype: currency
+    min: 0
+---
+id: Current Rent Extras
+question: |
+  Costs now
+subquestion: |
+  Fill in the numbers for extra costs you pay.
+
+  Include late fees, parking rent, water or heat fees, and pay fees.
+fields:
+  - "Late fees now": current_late_fees
+    datatype: currency
+    min: 0
+  - "Other rent now": current_other_rents
+    datatype: currency
+    min: 0
+  - "Other fees now": current_other_fees
+    datatype: currency
+    min: 0
+  - "Utility fees now": current_utilities_excess
+    datatype: currency
+    min: 0
+---
+id: Current Rent Total
+question: |
+  Total rent now
+subquestion: |
+  This is your total rent now
+fields:
+  - "Total rent now": current_rent_total
+    datatype: currency
+    min: 0
+---
+id: New base rent
+question: |
+  New base rent
+subquestion: |
+  What is the new rent your owner wants to charge you?
+fields:
+  - "New base rent": proposed_rent_amount
+    datatype: currency
+    min: 0
+---
+id: Proposed extra fees
+question: |
+  New extra fees
+subquestion: |
+  Does your owner want you to keep paying extra fees?
+
+  If so, include them below.
+fields:
+  - "New late fees": proposed_late_fees
+    datatype: currency
+    min: 0
+  - "New other rent": proposed_other_rents
+    datatype: currency
+    min: 0
+  - "New other fees": proposed_other_fees_average
+    datatype: currency
+    min: 0
+  - "New utility fees": proposed_utilities_excess
+    datatype: currency
+    min: 0
+---
+id: New Total Rent
+question: |
+  New total rent
+subquestion: |
+  This is your new total rent.
+fields:
+  - "New total rent": proposed_rent_total
+    datatype: currency
+    min: 0
+---
+id: Rent raise rate
+question: |
+  Rent raise rate
+subquestion: |
+  This is the rate your rent will go up.
+
+  The city of St. Paul caps rent hikes at 3%.
+fields:
+  - "Rent raise rate": rent_increase_percent
+    maxlength: 6
+  - "Rate": percent_rent_increase
+    maxlength: 4
+---
+id: preview limit_your_rent_increase
+question: |
+  Look at your form
+subquestion: |
+  Here is a draft of the form you will sign next.
+  
+  ${ al_recipient_bundle.as_pdf(key='preview') }
+
+  Click the image to open it in a new tab.
+
+  Click "Edit" to fix your answers.
+
+  ${ action_button_html(url_action('review_limit_your_rent_increase'), label='Edit', color='info') }
+continue button field: limit_your_rent_increase_preview_question    
+---
+code: |
+  signature_fields = ["users[0].signature"]
+---
+id: limit your rent increase review screen
+event: review_limit_your_rent_increase
+question: |
+  Check your answers
+review:
+  - Edit: lives_in_stpaul
+    button: |
+      **I live in St. Paul**:
+      ${ word(yesno(lives_in_stpaul)) }
+  - Edit: current_rent_amount
+    button: |
+      **Rent now**:
+      ${ currency(current_rent_amount) }
+  - Edit: proposed_rent_amount
+    button: |
+      **New base rent**:
+      ${ currency(proposed_rent_amount) }
+  - Edit: current_late_fees
+    button: |
+      **Late fees now**:
+      ${ currency(current_late_fees) }
+  - Edit: proposed_late_fees
+    button: |
+      **New late fees**:
+      ${ currency(proposed_late_fees) }
+  - Edit: current_other_rents
+    button: |
+      **Other rent now**:
+      ${ currency(current_other_rents) }
+  - Edit: proposed_other_rents
+    button: |
+      **New other rent**:
+      ${ currency(proposed_other_rents) }
+  - Edit: current_other_fees
+    button: |
+      **Other fees now**:
+      ${ currency(current_other_fees) }
+  - Edit: proposed_other_fees_average
+    button: |
+      **New other fees**:
+      ${ currency(proposed_other_fees_average) }
+  - Edit: current_utilities_excess
+    button: |
+      **Utility fees now**:
+      ${ currency(current_utilities_excess) }
+  - Edit: proposed_utilities_excess
+    button: |
+      **New utility fees**:
+      ${ currency(proposed_utilities_excess) }
+  - Edit: current_rent_total
+    button: |
+      **Total rent now**:
+      ${ currency(current_rent_total) }
+  - Edit: proposed_rent_total
+    button: |
+      **New total rent**:
+      ${ currency(proposed_rent_total) }
+  - Edit: rent_increase_percent
+    button: |
+      **Rent raise rate**:
+      ${ rent_increase_percent }
+  - Edit: other_parties.revisit
+    button: |
+      **Other parties**
+
+      % for item in other_parties:
+        * ${ item }
+      % endfor
+  - Edit: users.revisit
+    button: |
+      **Users**
+
+      % for item in users:
+        * ${ item }
+      % endfor
+  - Edit: percent_rent_increase
+    button: |
+      **Rate**:
+      ${ percent_rent_increase }
+  - Edit: signature_date
+    button: |
+      **Date of signature**:
+      ${ signature_date }
+---
+id: other parties review
+continue button field: other_parties.revisit
+question: |
+  Edit landlord
+subquestion: |
+  ${ other_parties.table }
+
+  ${ other_parties.add_action() }
+---
+table: other_parties.table
+rows: other_parties
+columns:
+  - Name: |
+      row_item.name.full() if defined("row_item.name.first") else ""
+  - Address: |
+      row_item.address.block() if defined("row_item.address.address") else ""
+edit:
+  - name.first
+  - address.address
+confirm: True
+
+---
+id: users review
+continue button field: users.revisit
+question: |
+  Edit tenant
+subquestion: |
+  ${ users.table }
+
+  ${ users.add_action() }
+---
+table: users.table
+rows: users
+columns:
+  - Name: |
+      row_item.name.full() if defined("row_item.name.first") else ""
+  - Address: |
+      row_item.address.block() if defined("row_item.address.address") else ""
+  - Signature: |
+      row_item.signature if defined("row_item.signature") else ""
+edit:
+  - name.first
+  - address.address
+  - signature
+confirm: True
+
+---
+id: download limit_your_rent_increase
+event: limit_your_rent_increase_download
+question: |
+  All done
+subquestion: |
+  Thank you ${users}. Your form is ready.
+  
+  View, download, and send your form below.
+
+  Click "Edit" to fix any mistakes.
+
+  ${ action_button_html(url_action('review_limit_your_rent_increase'), label='Edit', color='info') }
+  
+  
+  ${ al_user_bundle.download_list_html() }
+  
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
+
+progress: 100
+---
+# ALDocument objects specify the metadata for each template
+objects:
+  - limit_your_rent_increase_Post_interview_instructions: ALDocument.using(title="Instructions", filename="limit_your_rent_increase_next_steps.docx", enabled=True, has_addendum=False)
+  - limit_your_rent_increase_attachment: ALDocument.using(title="Limit your rent increase", filename="limit_your_rent_increase", enabled=True, has_addendum=False, )
+---
+# Bundles group the ALDocuments into separate downloads, such as for court and for the user
+objects:
+  - al_user_bundle: ALDocumentBundle.using(elements=[limit_your_rent_increase_Post_interview_instructions, limit_your_rent_increase_attachment], filename="limit_your_rent_increase", title="All forms to download for your records", enabled=True)
+  - al_recipient_bundle: ALDocumentBundle.using(elements=[limit_your_rent_increase_attachment],  filename="limit_your_rent_increase", title="All forms to file", enabled=True)
+---
+# Each attachment defines a key in an ALDocument. We use `i` as the placeholder here so the same template is 
+# used for "preview" and "final" keys, and logic in the template checks the value of 
+# `i` to show or hide the user's signature
+attachment:
+  name: Post-interview-Instructions
+  filename: limit_your_rent_increase_next_steps
+  docx template file: limit_your_rent_increase_next_steps.docx
+  variable name: limit_your_rent_increase_Post_interview_instructions[i]
+  skip undefined: True
+  tagged pdf: True
+---
+attachment:
+  name: limit your rent increase
+  filename: limit_your_rent_increase
+  variable name: limit_your_rent_increase_attachment[i]
+  skip undefined: True
+  pdf template file: limit_your_rent_increase.pdf
+  fields:
+      - "current_rent_amount__1": ${ currency(current_rent_amount) }
+      - "current_rent_amount__2": ${ currency(current_rent_amount) }
+      - "current_rent_amount": ${ currency(current_rent_amount) }
+      - "proposed_rent_amount__1": ${ currency(proposed_rent_amount) }
+      - "proposed_rent_amount__2": ${ currency(proposed_rent_amount) }
+      - "proposed_rent_amount": ${ currency(proposed_rent_amount) }
+      - "current_late_fees": ${ currency(current_late_fees) }
+      - "proposed_late_fees": ${ currency(proposed_late_fees) }
+      - "current_other_rents": ${ currency(current_other_rents) }
+      - "proposed_other_rents": ${ currency(proposed_other_rents) }
+      - "current_other_fees": ${ currency(current_other_fees) }
+      - "proposed_other_fees_average": ${ currency(proposed_other_fees_average) }
+      - "current_utilities_excess": ${ currency(current_utilities_excess) }
+      - "proposed_utilities_excess": ${ currency(proposed_utilities_excess) }
+      - "current_rent_total": ${ currency(current_rent_total) }
+      - "proposed_rent_total": ${ currency(proposed_rent_total) }
+      - "rent_increase_percent": ${ rent_increase_percent }
+      - "other_parties1_name_full": ${ other_parties[0] }
+      - "other_parties1_address_line_one": ${ other_parties[0].address.line_one() }
+      - "other_parties1_address_line_two": ${ other_parties[0].address.line_two() }
+      - "users1_name_full": ${ users[0] }
+      - "users1_address_on_one_line": ${ users[0].address.on_one_line() }
+      - "percent_rent_increase": ${ percent_rent_increase }
+      - "users1_signature": ${ users[0].signature_if_final(i) }
+      - "signature_date": ${ signature_date }
