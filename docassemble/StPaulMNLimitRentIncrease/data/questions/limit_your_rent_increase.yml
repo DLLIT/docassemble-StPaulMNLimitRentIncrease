@@ -86,7 +86,7 @@ code: |
   al_form_type = "letter"
 ---
 objects:
-  - users: ALPeopleList.using(there_are_any=True)
+  - users: ALPeopleList.using(ask_number=True, target_number=1)
 ---
 sections:
   - review_limit_your_rent_increase: Check your answers
@@ -109,11 +109,11 @@ code: |
   current_rent_amount
   current_late_fees
   set_progress(16)
-  current_rent_total
+  current_rent_total_screen
   proposed_rent_amount
   proposed_late_fees
   set_progress(32)
-  proposed_rent_total
+  proposed_rent_total_screen
   rent_increase_percent
   other_parties.gather()
   set_progress(48)
@@ -121,6 +121,36 @@ code: |
   users[0].address.address
   signature_date
   interview_order_limit_your_rent_increase = True
+---
+depends on:
+  - current_rent_amount
+  - current_late_fees
+  - current_other_rents
+  - current_other_fees
+  - current_utilities_excess
+code: |
+  current_rent_total = (
+    current_rent_amount
+    + current_late_fees
+    + current_other_rents
+    + current_other_fees
+    + current_utilities_excess
+  )
+---
+depends on:
+  - proposed_rent_amount
+  - proposed_late_fees
+  - proposed_other_rents
+  - proposed_other_fees_average
+  - proposed_utilities_excess
+code: |
+  proposed_rent_total = (
+    proposed_rent_amount
+    + proposed_late_fees
+    + proposed_other_rents
+    + proposed_other_fees_average
+    + proposed_utilities_excess
+  )
 ---
 ###################### Main order ######################
 comment: |
@@ -201,11 +231,8 @@ id: Current Rent Total
 question: |
   Total rent now
 subquestion: |
-  This is your total rent now
-fields:
-  - "Total rent now": current_rent_total
-    datatype: currency
-    min: 0
+  This is your total rent now: **${ currency(current_rent_total) }**
+continue button field: current_rent_total_screen
 ---
 id: New base rent
 question: |
@@ -242,11 +269,8 @@ id: New Total Rent
 question: |
   New total rent
 subquestion: |
-  This is your new total rent.
-fields:
-  - "New total rent": proposed_rent_total
-    datatype: currency
-    min: 0
+  This is your new total rent: **${ currency(proposed_rent_total) }**
+continue button field: proposed_rent_total_screen
 ---
 id: Rent raise rate
 question: |
@@ -328,11 +352,11 @@ review:
     button: |
       **New utility fees**:
       ${ currency(proposed_utilities_excess) }
-  - Edit: current_rent_total
+  - Edit: current_rent_total_screen
     button: |
       **Total rent now**:
       ${ currency(current_rent_total) }
-  - Edit: proposed_rent_total
+  - Edit: proposed_rent_total_screen
     button: |
       **New total rent**:
       ${ currency(proposed_rent_total) }
