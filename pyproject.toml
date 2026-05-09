@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "docassemble.StPaulMNLimitRentIncrease"
-version = "1.0.0"
+version = "1.0.3"
 description = "Generates a letter that petitions a limitation to any rent increase not to exceed 3%."
 readme = "README.md"
 authors = [

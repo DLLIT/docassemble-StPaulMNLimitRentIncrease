@@ -114,7 +114,7 @@ code: |
   proposed_late_fees
   set_progress(32)
   proposed_rent_total_screen
-  rent_increase_percent
+  rent_increase_percent_screen
   other_parties.gather()
   set_progress(48)
   other_parties[0].address.address
@@ -151,6 +151,16 @@ code: |
     + proposed_other_fees_average
     + proposed_utilities_excess
   )
+---
+depends on:
+  - current_rent_total
+  - proposed_rent_total
+code: |
+  rent_increase_value = 0
+  if current_rent_total:
+    rent_increase_value = ((proposed_rent_total / current_rent_total) - 1) * 100
+  rent_increase_percent = f"{rent_increase_value:.2f}".rstrip("0").rstrip(".")
+  percent_rent_increase = rent_increase_percent
 ---
 ###################### Main order ######################
 comment: |
@@ -276,14 +286,10 @@ id: Rent raise rate
 question: |
   Rent raise rate
 subquestion: |
-  This is the rate your rent will go up.
+  This is the rate your rent will go up: **${ rent_increase_percent }%**
 
   The city of St. Paul caps rent hikes at 3%.
-fields:
-  - "Rent raise rate": rent_increase_percent
-    maxlength: 6
-  - "Rate": percent_rent_increase
-    maxlength: 4
+continue button field: rent_increase_percent_screen
 ---
 id: preview limit_your_rent_increase
 question: |
@@ -360,10 +366,10 @@ review:
     button: |
       **New total rent**:
       ${ currency(proposed_rent_total) }
-  - Edit: rent_increase_percent
+  - Edit: rent_increase_percent_screen
     button: |
       **Rent raise rate**:
-      ${ rent_increase_percent }
+      ${ rent_increase_percent }%
   - Edit: other_parties.revisit
     button: |
       **Other parties**
@@ -378,10 +384,6 @@ review:
       % for item in users:
         * ${ item }
       % endfor
-  - Edit: percent_rent_increase
-    button: |
-      **Rate**:
-      ${ percent_rent_increase }
   - Edit: signature_date
     button: |
       **Date of signature**:

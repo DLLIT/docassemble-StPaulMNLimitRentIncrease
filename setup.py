@@ -44,7 +44,7 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
     return out
 
 setup(name='docassemble.StPaulMNLimitRentIncrease',
-      version='1.0.0',
+      version='1.0.3',
       description=('Generates a letter that petitions a limitation to any rent increase not to exceed 3%.'),
       long_description='Generates a letter that petitions a limitation to any rent increase not to exceed 3%.',
       long_description_content_type='text/markdown',
