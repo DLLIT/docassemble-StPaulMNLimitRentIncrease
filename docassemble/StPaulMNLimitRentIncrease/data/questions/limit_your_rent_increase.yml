@@ -115,6 +115,8 @@ code: |
   set_progress(32)
   proposed_rent_total_screen
   rent_increase_percent_screen
+  if rent_increase_value < 3:
+    exit_below_minimum_raise
   other_parties.gather()
   set_progress(48)
   other_parties[0].address.address
@@ -290,6 +292,17 @@ subquestion: |
 
   The city of St. Paul caps rent hikes at 3%.
 continue button field: rent_increase_percent_screen
+---
+id: exit below minimum raise
+event: exit_below_minimum_raise
+question: |
+  This rent increase is below 3%
+subquestion: |
+  Your new total rent would be **${ currency(proposed_rent_total) }**.
+
+  Based on the amounts you entered, your rent would increase by **${ rent_increase_percent }%**.
+
+  This interview is only for rent increases above 3%.
 ---
 id: preview limit_your_rent_increase
 question: |
